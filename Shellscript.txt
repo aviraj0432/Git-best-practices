@@ -1,0 +1,470 @@
+  Topics related to ShellScript
+
+* What is Shellscript?
+* Why we use Shellscript? 
+* How do we execute Shellscript?
+* How do we use the variables?
+* Types of variable.
+* What is Array Variable?
+* Difference between Array variable and Scalar Variable?
+* Types of Operator.
+* Types of conditional statements.
+* How do we use the conditional statement?
+* Types of loops in Shellscript.
+* Break and continue statement and how do we use it.
+* Substitution and variable substitution.
+* Metacharacters and quotes
+* Functions,Nested function and how to create functions
+* How to use 'man' command?
+
+
+Q. Read n and generate a pattern given below.
+:> 1
+   1 2
+   1 2 3
+   1 2 3 4
+
+  #!/bin/bash
+
+read -p "Enter the value of 'n': " n
+
+generate_pattern() {
+  local num_rows=$1
+
+  for ((i = 1; i <= num_rows; i++)); do
+    for ((j = 1; j <= i; j++)); do
+      echo -n "$j "
+    done
+    echo
+  done
+}
+echo "Pattern:"
+generate_pattern "$n" 
+
+Q. Write a script for scp & ssh by demonstrating remote login and file transfer functions. 
+
+
+#!/bin/bash
+
+read -p "Enter the remote machine's IP address: " remote_ip
+read -p "Enter the username for remote login: " remote_user
+
+ssh "$remote_user"@"$remote_ip"
+
+#!/bin/bash
+
+
+read -p "Enter the local file path: " local_file
+read -p "Enter the remote machine's IP address: " remote_ip
+read -p "Enter the username for remote login: " remote_user
+
+
+scp "$local_file" "$remote_user"@"$remote_ip":
+
+Q. Write a script for addition of two numbers for real numbers also
+
+#!/bin/bash
+
+read -p "Enter the first real number: " num1
+read -p "Enter the second real number: " num2
+
+# Validate if the input is numeric
+if ! [[ "$num1" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$num2" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+  echo "Error: Please enter valid real numbers."
+  exit 1
+fi
+
+result=$(echo "$num1 + $num2" | bc)
+
+echo "Result: $result"
+
+Q. Write a script for arithmetic calculator using command line arguments.
+
+#!/bin/bash
+add() {
+  echo "$1 + $2" | bc
+}
+
+subtract() {
+  echo "$1 - $2" | bc
+}
+
+multiply() {
+  echo "$1 * $2" | bc
+}
+
+divide() {
+  if (( $(bc <<< "$2 == 0") )); then
+    echo "Error: Division by zero is not allowed."
+  else
+    echo "$1 / $2" | bc
+  fi
+}
+if (( $# != 3 )); then
+  echo "Usage: $0 <operation> <num1> <num2>"
+  echo "Supported operations: add, subtract, multiply, divide"
+  exit 1
+fi
+
+operation=$1
+num1=$2
+num2=$3
+
+
+case "$operation" in
+  "add")
+    result=$(add "$num1" "$num2")
+    ;;
+  "subtract")
+    result=$(subtract "$num1" "$num2")
+    ;;
+  "multiply")
+    result=$(multiply "$num1" "$num2")
+    ;;
+  "divide")
+    result=$(divide "$num1" "$num2")
+    ;;
+  *)
+    echo "Error: Invalid operation. Supported operations: add, subtract, multiply, divide"
+    exit 1
+    ;;
+esac
+
+echo "Result: $result"
+
+Q. Write a script to print a given number in reverse order.
+
+#!/bin/bash
+
+read -p "Enter a number: " number
+
+
+reverse_number() {
+  local num=$1
+  local reversed=""
+
+  while [ "$num" -gt 0 ]; do
+    digit=$((num % 10))
+    reversed="${reversed}${digit}"
+    num=$((num / 10))
+  done
+echo "$reversed"
+}
+reversed_number=$(reverse_number "$number")
+echo "Reversed Number: $reversed_number"
+
+Q. Write a script to delete empty lines from a file.
+
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <file>"
+  exit 1
+fi
+
+file="$1"
+
+if [ ! -f "$file" ]; then
+  echo "Error: File '$file' not found."
+  exit 1
+fi
+
+sed -i '/^[[:space:]]*$/d' "$file"
+
+echo "Empty lines deleted from '$file'."
+
+Q. Write a script to  perform Arithmetic operation on digits of a given number depending upon the operator.
+
+#!/bin/bash
+
+perform_arithmetic() {
+  local num=$1
+  local operator=$2
+  local result=0
+
+  case "$operator" in
+    "+")
+      result=$(echo $num | sed 's/\(.\)/+\1/g' | bc)
+      ;;
+    "-")
+      result=$(echo $num | sed 's/\(.\)/-\1/g' | bc)
+      ;;
+    "*")
+      result=$(echo $num | sed 's/\(.\)/*\1/g' | bc)
+      ;;
+    "/")
+      result=$(echo "scale=2; $num" | sed 's/\(.\)\(.\)/\/\1\2/g' | bc)
+      ;;
+    *)
+      echo "Error: Invalid operator. Supported operators: +, -, *, /"
+      exit 1
+      ;;
+  esac
+
+  echo "Result: $result"
+}
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 <number> <operator>"
+  echo "Supported operators: +, -, *, /"
+  exit 1
+fi
+number=$1
+operator=$2
+
+if ! [[ "$number" =~ ^[0-9]+$ ]]; then
+  echo "Error: Please enter valid nuber."
+  exit 1
+fi
+
+perform_arithmetic "$number" "$operator"
+
+Q. Read n and generate fibonacci numbers less than or equal to n.
+
+#!/bin/bash
+
+
+generate_fibonacci() {
+  local limit=$1
+
+  local fib1=0
+  local fib2=1
+
+   echo -n "$fib1 "
+
+  while [ $fib2 -le $limit ]; do
+    echo -n "$fib2 "
+
+     next_fib=$((fib1 + fib2))
+
+    fib1=$fib2
+    fib2=$next_fib
+  done
+echo 
+}
+
+read -p "Enter a number (n): " n
+
+if ! [[ "$n" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Error: Please enter a positive integer."
+  exit 1
+fi
+echo "Fibonacci numbers less than or equal to $n:"
+generate_fibonacci "$n"
+
+Q. Write a script to print the length of each and every string using arrays.
+
+#!/bin/bash
+
+
+read_strings() {
+  local i=0
+
+  echo "Enter strings (type 'done' when finished):"
+  while true; do
+    read -r input_string
+    if [ "$input_string" == "done" ]; then
+      break
+    fi
+    strings_array[i]=$input_string
+    i=$((i + 1))
+  done
+}
+print_lengths() {
+  echo "Length of each string:"
+  for string in "${strings_array[@]}"; do
+    echo "${#string}"
+  done
+}
+
+declare -a strings_array
+
+read_strings
+print_lengths
+
+Q. Write a script to print chess board
+
+#!/bin/bash
+
+
+print_chessboard() {
+  local size=$1
+
+  for ((i = 1; i <= size; i++)); do
+    for ((j = 1; j <= size; j++)); do
+      # If the sum of row and column index is even, print a white square (space)
+      # If it's odd, print a black square (#)
+      if (( (i + j) % 2 == 0 )); then
+        echo -n " "
+      else
+        echo -n "#"
+      fi
+    done
+    echo # Move to the next line
+  done
+}
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <size>"
+  exit 1
+fi
+
+
+size=$1
+if ! [[ "$size" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Error: Please enter a positive integer for the size."
+  exit 1
+fi
+print_chessboard "$size"
+
+Q. Write a script to sort a given number in ascending or descending order
+
+#!/bin/bash
+sort_ascending() {
+  sorted_array=($(printf '%s\n' "${numbers_array[@]}" | sort -n))
+}
+sort_descending() {
+  sorted_array=($(printf '%s\n' "${numbers_array[@]}" | sort -nr))
+}
+
+display_sorted_numbers() {
+  echo "Sorted Numbers:"
+  for number in "${sorted_array[@]}"; do
+    echo "$number"
+  done
+}
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <ascending/descending>"
+  exit 1
+fi
+sorting_order=$
+echo "Enter numbers separated by spaces:"
+read -r -a numbers_array
+
+for number in "${numbers_array[@]}"; do
+  if ! [[ "$number" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Error: Please enter valid numbers only."
+    exit 1
+  fi
+done
+
+case "$sorting_order" in
+  "ascending")
+    sort_ascending
+    ;;
+  "descending")
+    sort_descending
+    ;;
+  *)
+    echo "Error: Invalid sorting order. Supported options: ascending, descending"
+    exit 1
+    ;;
+esac
+display_sorted_numbers
+
+Q. Write a script to rename a directory replaced by lower/upper case letters.
+
+#!/bin/bash
+
+rename_directory() {
+  local source_dir=$1
+  local target_dir=$2
+  local letter_case=$3
+
+  if [ ! -d "$source_dir" ]; then
+    echo "Error: Source directory '$source_dir' not found."
+    exit 1
+  fi
+
+  if [ "$letter_case" == "lowercase" ]; then
+    target_dir=$(echo "$target_dir" | tr '[:upper:]' '[:lower:]')
+  elif [ "$letter_case" == "uppercase" ]; then
+    target_dir=$(echo "$target_dir" | tr '[:lower:]' '[:upper:]')
+  else
+    echo "Error: Invalid letter case. Supported options: lowercase, uppercase"
+    exit 1
+  fi
+mv "$source_dir" "$target_dir"
+
+  echo "Directory renamed from '$source_dir' to '$target_dir'."
+}
+if [ $# -ne 3 ]; then
+  echo "Usage: $0 <source_directory> <target_directory> <lowercase/uppercase>"
+  exit 1
+fi
+
+source_directory=$1
+target_directory=$2
+letter_case=$3
+
+rename_directory "$source_directory" "$target_directory" "$letter_case"
+
+Q. Write script to print contents of file from given line number to next given number of lines
+
+#!/bin/bash
+
+print_lines_from_file() {
+  local file=$1
+  local start_line=$2
+  local num_lines=$3
+
+  if [ ! -f "$file" ]; then
+    echo "Error: File '$file' not found."
+    exit 1
+  fi
+
+  if [ $start_line -le 0 ]; then
+    echo "Error: Start line number should be a positive integer."
+    exit 1
+  fi
+
+  if [ $num_lines -le 0 ]; then
+    echo "Error: Number of lines should be a positive integer."
+    exit 1
+  fi
+
+  tail -n +"$start_line" "$file" | head -n "$num_lines"
+}
+
+if [ $# -ne 3 ]; then
+  echo "Usage: $0 <file> <start_line> <num_lines>"
+  exit 1
+fi
+
+file="$1"
+start_line="$2"
+num_lines="$3"
+
+print_lines_from_file "$file" "$start_line" "$num_lines"
+
+Q. Shell script to convert string lower to upper and upper to lower
+
+#!/bin/bash
+
+convert_to_lowercase() {
+  local input_string=$1
+  local lowercase_string=$(echo "$input_string" | tr '[:upper:]' '[:lower:]')
+  echo "Lowercase: $lowercase_string"
+}
+
+convert_to_uppercase() {
+  local input_string=$1
+  local uppercase_string=$(echo "$input_string" | tr '[:lower:]' '[:upper:]')
+  echo "Uppercase: $uppercase_string"
+}
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <string>"
+  exit 1
+fi
+
+input_string="$1"
+
+
+convert_to_lowercase "$input_string"
+convert_to_uppercase "$input_string"
+
+
+
+ 
